@@ -2,19 +2,89 @@
 
 A future/promise model async flow based on core.async.
 
+Can be used with both Clojure and ClojureScript.
+
 ## Installation
 
-```clojure
-[cav/asyncflow "0.1.0"]
-```
+[![cav/asyncflow](http://clojars.org/cav/asyncflow/latest-version.svg)](http://clojars.org/cav/asyncflow)
 
 ## Example
 
-See unit tests.
+for Clojure
 
-## API
+```clojure
+(ns cav.example
+  (:require [cav.asyncflow :refer [async]]))
 
-TBD
+(defn f [x callback]
+  (future
+    (Thread/sleep 10)
+    (callback (inc x))))
+
+;; Sequential.
+;; Will print "a = 2, b = 4"
+(async
+  (let [a (f 1 ...)
+        b (f (inc @a) ...)]
+    (printf "a = %d, b = %d" @a @b)
+    (flush)))
+
+;; Parallel
+;; Will print "a = 2, b = 3"
+(async
+  (let [a (f 1 ...)
+        b (f 2 ...)]
+    (printf "a = %d, b = %d" @a @b)
+    (flush)))
+```
+
+for ClojureScript
+
+```clojure
+(ns cav.example
+  (:require-macros [cav.cljs.asyncflow :refer [async]]))
+
+(defn f [x callback]
+  (js/setTimeout
+    (fn [] (callback (inc x)))
+    10))
+
+;; Sequential.
+;; Will print "a = 2, b = 4"
+(async
+  (let [a (f 1 ...)
+        b (f (inc !a) ...)]
+    (printf "a = %d, b = %d" !a !b)
+    (flush)))
+
+;; Parallel
+;; Will print "a = 2, b = 3"
+(async
+  (let [a (f 1 ...)
+        b (f 2 ...)]
+    (printf "a = %d, b = %d" !a !b)
+    (flush)))
+```
+
+If you want to wait for a collection of async calls in ClojureScript, you can use `!!`, like this:
+
+```clojure
+(async
+  (let [res (map #(f % ...) (range 3))
+        [a b c] !!res]
+    (printf "a = %d, b = %d, c = %d" a b c)
+    (flush)))
+```
+
+The same logic can be expressed in Clojure like this:
+
+```clojure
+(async
+  (let [res (map #(f % ...) (range 3))
+        [a b c] (mapv deref res)]
+    (printf "a = %d, b = %d, c = %d" a b c)
+    (flush)))
+```
 
 ## License
 
