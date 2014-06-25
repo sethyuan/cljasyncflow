@@ -14,7 +14,8 @@ for Clojure
 
 ```clojure
 (ns cav.example
-  (:require [cav.asyncflow :refer [async]]))
+  (:require [cav.asyncflow :refer [async]]
+            [clojure.core.async]))
 
 (defn f [x callback]
   (future
@@ -42,6 +43,7 @@ for ClojureScript
 
 ```clojure
 (ns cav.example
+  (:require [cljs.core.async])
   (:require-macros [cav.cljs.asyncflow :refer [async]]))
 
 (defn f [x callback]
